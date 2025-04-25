@@ -5,6 +5,7 @@ import com.example.restful_api.dtos.global.PaginationResponse;
 import com.example.restful_api.dtos.request.CompanyRequest;
 import com.example.restful_api.entity.Company;
 import com.example.restful_api.service.ICompanyService;
+import com.example.restful_api.utils.annotation.ApiMessage;
 import com.turkraft.springfilter.boot.Filter;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -29,18 +30,21 @@ public class CompanyController {
     }
 
     @PostMapping
+    @ApiMessage("Create new an Company")
     public ResponseEntity<?> handleSaveCompany(@Valid @RequestBody CompanyRequest companyRequest) {
         var result = this.companyService.handleSave(companyRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
     @PutMapping("")
+    @ApiMessage("Updated an Company")
     public ResponseEntity<Company> handleUpdateCompanies(@Valid @RequestBody Company company) {
         var result = this.companyService.handleUpdateCompany(company);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
     @DeleteMapping("/{id}")
+    @ApiMessage("Deleted Company By Id")
     public ResponseEntity<Object> handleUpdateCompanies(@PathVariable("id") Long id) {
         this.companyService.deleteCompanyById(id);
         return ResponseEntity.ok().body("Delete successfully!");
@@ -53,6 +57,7 @@ public class CompanyController {
     }
 
     @GetMapping()
+    @ApiMessage("Fetch all Company")
     public ResponseEntity<PaginationResponse> handleGetCompaniesPagination(@Filter Specification<Company> companySpecification, Pageable pageable) {
         PaginationResponse response = this.companyService.getCompanyPagination(companySpecification, pageable);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);

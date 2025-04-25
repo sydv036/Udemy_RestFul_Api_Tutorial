@@ -1,6 +1,7 @@
 package com.example.restful_api.infastructors;
 
 import com.example.restful_api.dtos.global.RestResponse;
+import com.example.restful_api.utils.annotation.ApiMessage;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
@@ -37,8 +38,9 @@ public class ResponseConfiguration implements ResponseBodyAdvice<Object> {
         if (status >= 400) {
             return body;
         } else {
+            ApiMessage message = returnType.getMethodAnnotation(ApiMessage.class);
             res.setData(body);
-            res.setMessage("Call Api Successfully!");
+            res.setMessage(message != null ? message.value() : "Call Api Successfully!");
         }
         return res;
     }

@@ -3,8 +3,10 @@ package com.example.restful_api.controller;
 import com.example.restful_api.dtos.global.PaginationResponse;
 import com.example.restful_api.dtos.global.RestResponse;
 import com.example.restful_api.dtos.request.UsersRequest;
+import com.example.restful_api.dtos.response.UserResponse;
 import com.example.restful_api.entity.Users;
 import com.example.restful_api.service.IUserService;
+import com.example.restful_api.utils.annotation.ApiMessage;
 import com.turkraft.springfilter.boot.Filter;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
@@ -17,7 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/v1/users")
 @CrossOrigin("*")
 public class UserController {
     private final IUserService userService;
@@ -33,6 +35,7 @@ public class UserController {
 //    }
 
     @GetMapping
+    @ApiMessage("Fetch All User")
     public ResponseEntity<?> getUsers(@Filter Specification<Users> usersSpecification, Pageable pageable) {
         /*
         usersSpecification:{
@@ -47,19 +50,29 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/{id}")
+    @ApiMessage("Fetch User by ID")
+    public ResponseEntity<UserResponse> fetchUserById(@PathVariable("id") Long id) {
+        UserResponse userResponse = userService.fetchUserById(id);
+        return ResponseEntity.ok().body(userResponse);
+    }
+
     @PostMapping
+    @ApiMessage("Create an new user")
     public ResponseEntity<?> saveUser(@Valid @RequestBody UsersRequest users) {
-        Users result = userService.saveUser(users);
+        UserResponse result = userService.saveUser(users);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@RequestBody Users users, @PathVariable("id") Long id) {
-        Users result = userService.updateUser(id, users);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new RestResponse<>(HttpStatus.CREATED.value(), "Update User", result, null));
+    @ApiMessage("Updated an user")
+    public ResponseEntity<UserResponse> updateUser(@RequestBody Users users, @PathVariable("id") Long id) {
+        UserResponse result = userService.updateUser(id, users);
+        return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
     @DeleteMapping("/{id}")
+    @ApiMessage("Delete User By Id")
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         userService.deleteUserById(id);
         return ResponseEntity.ok(new RestResponse<>(HttpStatus.ACCEPTED.value(), "Delete User", null, null));

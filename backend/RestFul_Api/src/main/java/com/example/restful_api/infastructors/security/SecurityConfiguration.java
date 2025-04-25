@@ -42,8 +42,10 @@ public class SecurityConfiguration {
         httpSecurity
                 .csrf(c -> c.disable())
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("/", "/api/v1/auth/register",
+                        .requestMatchers("/",
+                                "/api/v1/auth/register",
                                 "/api/v1/auth/login",
+                                "/api/v1/auth/refresh",
                                 "/swagger", "/swagger-ui/index.html").permitAll()
                         .anyRequest().authenticated())
 
@@ -91,7 +93,7 @@ public class SecurityConfiguration {
         JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new
                 JwtGrantedAuthoritiesConverter();
         grantedAuthoritiesConverter.setAuthorityPrefix("");
-        grantedAuthoritiesConverter.setAuthoritiesClaimName("JWT");
+        grantedAuthoritiesConverter.setAuthoritiesClaimName("permission");
         JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
         return jwtAuthenticationConverter;

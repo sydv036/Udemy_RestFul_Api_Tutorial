@@ -3,6 +3,7 @@ package com.example.restful_api.service.impl;
 import com.example.restful_api.dtos.global.MetaPagination;
 import com.example.restful_api.dtos.global.PaginationResponse;
 import com.example.restful_api.dtos.request.UsersRequest;
+import com.example.restful_api.dtos.response.UserResponse;
 import com.example.restful_api.entity.Users;
 import com.example.restful_api.repository.IUserRepository;
 import com.example.restful_api.service.IUserService;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -55,23 +57,28 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public Users saveUser(UsersRequest usersRequest) {
+    public UserResponse saveUser(UsersRequest usersRequest) {
         if (userRepository.existsByEmail(usersRequest.getEmail())) {
             throw new IllegalArgumentException("Email exist in DB");
         }
         String hashPassword = passwordEncoder.encode(usersRequest.getPassword());
         usersRequest.setPassword(hashPassword);
         Users users = mapper.map(usersRequest, Users.class);
-        return userRepository.save(users);
+        var result = userRepository.save(users);
+        UserResponse userResponse = mapper.map(result, UserResponse.class);
+        return userResponse;
     }
 
     @Override
-    public Users updateUser(Long id, Users users) {
-        return findById(id).map(item -> {
-            item.setEmail(users.getEmail());
+    public UserResponse updateUser(Long id, Users users) {
+        Users usersUpdated = findById(id).map(item -> {
             item.setName(users.getName());
+            item.setAddress(users.getAddress());
+            item.setAge(users.getAge());
+            item.setGender(users.getGender());
             return userRepository.saveAndFlush(item);
         }).orElseThrow(() -> new IllegalArgumentException(("User not found")));
+        return mapper.map(usersUpdated, UserResponse.class);
     }
 
     @Override
@@ -96,20 +103,24 @@ public class UserServiceImpl implements IUserService {
         return users;
     }
 
-//    @Override
-//    public PaginationResponse getUserPagination(Optional<Integer> current, Optional<Integer> pageSize) {
-//        Pageable pageable = PageRequest.of(current.orElse(valueConstant.DEFAULT_CURRENT_PAGE) - 1, pageSize.orElse(valueConstant.DEFAULT_PAGE_SIZE));
-//        Page page = userRepository.findAll(pageable);
-//        MetaPagination metaPagination = new MetaPagination(page.getTotalElements(), page.getNumber() + 1, page.getSize(), page.getTotalPages());
-//        PaginationResponse response = new PaginationResponse(metaPagination, page.getContent());
-//        return response;
-//    }
+    @Override
+    public UserResponse fetchUserById(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new IllegalArgumentException("User id = " + id + " khong ton tai trong db");
+        }
+        Users users = userRepository.findById(id).get();
+        return mapper.map(users, UserResponse.class);
+    }
+
 
     @Override
     public PaginationResponse getUserPagination(Specification<Users> usersSpecification, Pageable pageable) {
         Page<Users> page = userRepository.findAll(usersSpecification, pageable);
         MetaPagination metaPagination = new MetaPagination(page.getTotalElements(), pageable.getPageNumber() + 1, pageable.getPageSize(), page.getTotalPages());
-        PaginationResponse response = new PaginationResponse(metaPagination, page.getContent());
+        List<UserResponse> userResponses = page.getContent().stream().map(item -> {
+            return mapper.map(item, UserResponse.class);
+        }).collect(Collectors.toList());
+        PaginationResponse response = new PaginationResponse(metaPagination, userResponses);
         return response;
     }
 

@@ -2,6 +2,7 @@ package com.example.restful_api.service;
 
 import com.example.restful_api.dtos.global.PaginationResponse;
 import com.example.restful_api.dtos.request.UsersRequest;
+import com.example.restful_api.dtos.response.UserResponse;
 import com.example.restful_api.entity.Users;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -15,13 +16,15 @@ public interface IUserService {
 
     Optional<Users> findById(Long id);
 
-    Users saveUser(UsersRequest usersRequest);
+    UserResponse saveUser(UsersRequest usersRequest);
 
-    Users updateUser(Long id, Users users);
+    UserResponse updateUser(Long id, Users users);
 
     void deleteUserById(Long id);
 
     Users findByEmail(String email);
+
+    UserResponse fetchUserById(Long id);
 
     PaginationResponse getUserPagination(Specification<Users> usersSpecification, Pageable pageable);
 

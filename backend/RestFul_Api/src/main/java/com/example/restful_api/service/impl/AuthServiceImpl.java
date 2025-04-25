@@ -1,4 +1,4 @@
-package com.example.restful_api.controller;
+package com.example.restful_api.service.impl;
 
 import com.example.restful_api.dtos.request.auth.LoginRequest;
 import com.example.restful_api.dtos.request.auth.LoginResponse;
@@ -7,25 +7,20 @@ import com.example.restful_api.entity.Users;
 import com.example.restful_api.service.IAuthService;
 import com.example.restful_api.service.IUserService;
 import com.example.restful_api.utils.SecurityUtil;
-import com.example.restful_api.utils.annotation.ApiMessage;
-import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.stereotype.Service;
 
-@RestController
-@RequestMapping("/api/v1/auth")
-public class AuthController {
+@Service
+public class AuthServiceImpl implements IAuthService {
 
     @Autowired
-    private IAuthService authService;
+    private AuthenticationManagerBuilder managerBuilder;
 
     @Autowired
     private SecurityUtil securityUtil;
@@ -34,15 +29,10 @@ public class AuthController {
     private IUserService userService;
 
     @Autowired
-    private AuthenticationManagerBuilder managerBuilder;
-
-    @Autowired
     private ModelMapper mapper;
 
-
-    @PostMapping("/login")
-    @ApiMessage("Login")
-    public ResponseEntity<?> authLogin(@Valid @RequestBody LoginRequest loginRequest) {
+    @Override
+    public LoginResponse<Object> handleLogin(LoginRequest loginRequest) {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword());
         Authentication authentication = managerBuilder.getObject().authenticate(authenticationToken);
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -58,34 +48,9 @@ public class AuthController {
         userService.updateUser(userResponse.getId(), usersDB);
 
         ResponseCookie cookie = ResponseCookie.from("refresh_token", refreshToken)
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .maxAge(securityUtil.refreshTokenExpiration)
+//                .httpOnly(true)
                 .build();
-        return ResponseEntity
-                .ok()
-                .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body(response);
-    }
 
-    @GetMapping("/account")
-    @ApiMessage("Fetch account")
-    public ResponseEntity<?> refreshUser(HttpHeaders httpHeaders) {
-        String email = SecurityUtil.getCurrentUserLogin();
-        Users users = userService.findByEmail(email);
-        UserResponse userResponse = mapper.map(users, UserResponse.class);
-        return ResponseEntity.ok().body(userResponse);
-    }
-
-    @GetMapping("/refresh")
-    @ApiMessage("Get User by refresh token")
-    public ResponseEntity<String> getRefreshToken(@CookieValue("refresh_token") String refreshToken) {
-        return ResponseEntity.ok().body(refreshToken);
+        return response;
     }
 }
-
-
-
-
-

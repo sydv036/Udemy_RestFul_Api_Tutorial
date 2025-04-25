@@ -10,6 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.Collections;
 import java.util.List;
@@ -62,6 +63,15 @@ public class GlobalException {
         response.setStatusCode(HttpStatus.BAD_REQUEST.value());
         response.setErrorCode(ex.getMessage());
         response.setMessage("Username or Password inValid!");
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<?> hanledResourceNotFound(Exception ex) {
+        RestResponse<Object> response = new RestResponse<>();
+        response.setStatusCode(HttpStatus.NOT_FOUND.value());
+        response.setErrorCode(ex.getMessage());
+        response.setMessage("404 Not Found. URL Not Found");
         return ResponseEntity.badRequest().body(response);
     }
 
