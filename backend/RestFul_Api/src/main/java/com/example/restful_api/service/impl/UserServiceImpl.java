@@ -8,6 +8,7 @@ import com.example.restful_api.entity.Users;
 import com.example.restful_api.repository.IUserRepository;
 import com.example.restful_api.service.IUserService;
 import com.example.restful_api.utils.ValueConstant;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,7 +78,7 @@ public class UserServiceImpl implements IUserService {
             item.setAge(users.getAge());
             item.setGender(users.getGender());
             return userRepository.saveAndFlush(item);
-        }).orElseThrow(() -> new IllegalArgumentException(("User not found")));
+        }).orElseThrow(() -> new EntityNotFoundException(("User not found")));
         return mapper.map(usersUpdated, UserResponse.class);
     }
 
@@ -122,6 +123,15 @@ public class UserServiceImpl implements IUserService {
         }).collect(Collectors.toList());
         PaginationResponse response = new PaginationResponse(metaPagination, userResponses);
         return response;
+    }
+
+    @Override
+    public Users findByEmailAndRefreshToken(String email, String refreshToken) {
+        Users users = userRepository.findByEmailAndRefreshToken(email, refreshToken);
+        if (Optional.ofNullable(users).isEmpty()) {
+            throw new EntityNotFoundException("Email " + email + " và refresh token không tồn tại trong DB");
+        }
+        return users;
     }
 
 }

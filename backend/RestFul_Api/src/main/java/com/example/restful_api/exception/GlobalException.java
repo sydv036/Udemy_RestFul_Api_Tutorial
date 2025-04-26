@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.oauth2.jwt.BadJwtException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -72,6 +73,15 @@ public class GlobalException {
         response.setStatusCode(HttpStatus.NOT_FOUND.value());
         response.setErrorCode(ex.getMessage());
         response.setMessage("404 Not Found. URL Not Found");
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    @ExceptionHandler(BadJwtException.class)
+    public ResponseEntity<?> hanledBadJwt(Exception ex) {
+        RestResponse<Object> response = new RestResponse<>();
+        response.setStatusCode(HttpStatus.UNAUTHORIZED.value());
+        response.setErrorCode(ex.getMessage());
+        response.setMessage("Token không hợp lệ (có thể trống, không đúng định dạng)");
         return ResponseEntity.badRequest().body(response);
     }
 

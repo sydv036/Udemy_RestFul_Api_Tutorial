@@ -1,13 +1,16 @@
 package com.example.restful_api.dtos.request.auth;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 
 public class LoginResponse<T> {
 
+    @JsonProperty("access_token")
     private String accessToken;
 
+    @JsonProperty("user")
     private T data;
 
     public LoginResponse() {

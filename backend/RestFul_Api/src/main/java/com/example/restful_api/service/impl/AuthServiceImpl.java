@@ -40,7 +40,7 @@ public class AuthServiceImpl implements IAuthService {
         Users usersDB = userService.findByEmail(authentication.getName());
         UserResponse userResponse = mapper.map(usersDB, UserResponse.class);
 
-        String accessToken = securityUtil.createAccessToken(authentication, userResponse);
+        String accessToken = securityUtil.createAccessToken(loginRequest.getUsername(), userResponse);
         LoginResponse<Object> response = new LoginResponse<>(accessToken, userResponse);
 
         String refreshToken = securityUtil.createReFreshToken(loginRequest.getUsername(), userResponse);

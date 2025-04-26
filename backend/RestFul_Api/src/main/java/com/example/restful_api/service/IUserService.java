@@ -28,4 +28,6 @@ public interface IUserService {
 
     PaginationResponse getUserPagination(Specification<Users> usersSpecification, Pageable pageable);
 
+    Users findByEmailAndRefreshToken(String email, String refreshToken);
+
 }
